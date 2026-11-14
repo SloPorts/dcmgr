@@ -1,0 +1,49 @@
+# systemd unit for dcmgr. Installed to /etc/systemd/system/dcmgr.service by deploy/install.sh,
+# which also rewrites the python3 path if it isn't /usr/bin/python3. Logs: journalctl -u dcmgr
+[Unit]
+Description=dcmgr: shared Dreamcast (dcload-ip) lock, discovery and reset manager
+Documentation=file:///opt/dcmgr/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/dcmgr/dcmgr_server.py -c /etc/dcmgr/dcmgr.json
+User=dcmgr
+Group=dcmgr
+# capture stick picture and sound (/dev/video*, /dev/snd/*)
+SupplementaryGroups=video audio
+WorkingDirectory=/var/lib/dcmgr
+StateDirectory=dcmgr
+StateDirectoryMode=0750
+# optional DCMGR_API_TOKEN=... / DCMGR_HA_TOKEN=... to keep secrets out of dcmgr.json
+EnvironmentFile=-/etc/dcmgr/secrets.env
+Restart=always
+RestartSec=5
+
+# "extra_ports": [80] (plain http://host/ for the agent guide) without root
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# hardening; dcmgr only writes its state directory. Not PrivateDevices: it needs the capture devices.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+# AF_NETLINK for `ip`/`arp` lookups; ICMP ("probe": "ping") uses unprivileged ping sockets (AF_INET)
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="dcmgr-token" content="<!--DCMGR:TOKEN-->">
+<meta name="dcmgr-controls" content="<!--DCMGR:CONTROLS-->">
+<title>Dreamcast rig</title>
+<script>
+// apply display preferences before first paint (no flash of the wrong theme or size)
+try {
+  const t = localStorage.getItem("dcmgr-theme"), z = localStorage.getItem("dcmgr-size");
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  if (z) document.documentElement.dataset.size = z;
+} catch (e) {}
+</script>
+<style>
+:root {
+  --bg: #f4f3ef; --card: #ffffff; --fg: #1c1c1a; --muted: #6d6c66; --line: #e2e0d8;
+  --accent: #e8590c; --accent-fg: #ffffff;
+  --ok: #2b8a3e; --info: #1c6dd0; --warn: #c46a00; --bad: #c92a2a; --violet: #7048e8;
+  --ok-bg: #e6f4ea; --info-bg: #e5effc; --warn-bg: #fdf0dc; --bad-bg: #fde8e8; --muted-bg: #eeede8;
+  --violet-bg: #efeafd;
+  --shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141413; --card: #1e1e1c; --fg: #e9e8e3; --muted: #9a9890; --line: #33322e;
+    --ok: #69db7c; --info: #74b3ff; --warn: #ffb347; --bad: #ff8787; --violet: #b197fc;
+    --ok-bg: #1d3323; --info-bg: #1a2a40; --warn-bg: #3a2c14; --bad-bg: #3d1f1f; --muted-bg: #2a2a27;
+    --violet-bg: #2a2340;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141413; --card: #1e1e1c; --fg: #e9e8e3; --muted: #9a9890; --line: #33322e;
+  --ok: #69db7c; --info: #74b3ff; --warn: #ffb347; --bad: #ff8787; --violet: #b197fc;
+  --ok-bg: #1d3323; --info-bg: #1a2a40; --warn-bg: #3a2c14; --bad-bg: #3d1f1f; --muted-bg: #2a2a27;
+  --violet-bg: #2a2340;
+  --shadow: none;
+}
+html { font-size: 14px; }
+html[data-size="s"] { font-size: 13px; }
+html[data-size="l"] { font-size: 16px; }
+html[data-size="xl"] { font-size: 18px; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }  /* class rules with display: must not show hidden elements */
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 1rem/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+header h1 { font-size: 1.43rem; margin: 0; display: flex; align-items: center; gap: 10px; }
+.swirl { width: 1.85rem; height: 1.85rem; flex: none; }
+.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.who { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.who input { width: 140px; }
+.conn { font-size: .86rem; color: var(--muted); }
+.conn.down { color: var(--bad); font-weight: 600; }
+.banner { border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; display: flex; gap: 12px;
+  align-items: center; flex-wrap: wrap; }
+.banner.warn { background: var(--warn-bg); color: var(--warn); }
+.banner.info { background: var(--info-bg); color: var(--info); }
+.banner.bad { background: var(--bad-bg); color: var(--bad); }
+.banner .grow { flex: 1; min-width: 200px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.span2 { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .hdr-right { margin-left: 0; flex: 1 1 100%; }
+  .who { flex: 1; } .who input { flex: 1; width: auto; min-width: 0; }
+}
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  box-shadow: var(--shadow); min-width: 0; }
+.card h2, .card > details > summary { font-size: .93rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); margin: 0 0 10px; font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.card h2 .right, summary .right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+/* collapsible cards: the summary is the card heading */
+.card > details > summary { list-style: none; cursor: pointer; margin: 0; }
+.card > details > summary::-webkit-details-marker { display: none; }
+.card > details > summary::before { content: "\25B8"; font-size: .8em; transition: transform .15s; }
+.card > details[open] > summary::before { transform: rotate(90deg); }
+.card > details[open] > summary { margin-bottom: 10px; }
+.big { font-size: 1.29rem; font-weight: 600; overflow-wrap: anywhere; }
+.sub { color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.row .label { color: var(--muted); font-size: .86rem; min-width: 52px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 10px;
+  font-size: .93rem; font-weight: 600; white-space: nowrap; text-transform: none; letter-spacing: 0; }
+.pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.pill.plain::before { display: none; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.info { background: var(--info-bg); color: var(--info); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); }
+.pill.bad { background: var(--bad-bg); color: var(--bad); }
+.pill.muted { background: var(--muted-bg); color: var(--muted); }
+.pill.pulse::before { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+.tag { font-size: .79rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--muted-bg); color: var(--muted); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.tag.hold { background: var(--info-bg); color: var(--info); }
+button, select, input { font: inherit; color: var(--fg); background: var(--card);
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; }
+input, select { padding: 5px 8px; }
+button { cursor: pointer; font-weight: 500; }
+button:hover:not(:disabled) { border-color: var(--muted); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+button.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--line)); }
+button.icon { padding: 4px 8px; min-width: 32px; }
+button.link { border: 0; background: none; padding: 0; color: inherit; text-decoration: underline dotted;
+  text-underline-offset: 3px; font-weight: inherit; }
+button.link:hover { color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; overflow-wrap: anywhere; }
+.divider { border-top: 1px solid var(--line); margin: 14px 0 0; padding-top: 2px; }
+.more { margin-top: 12px; }
+.more > summary { cursor: pointer; color: var(--muted); font-size: .93rem; }
+.more > .kv { margin-top: 8px; }
+ol.queue { list-style: none; margin: 0; padding: 0; }
+ol.queue li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+ol.queue li:first-child { border-top: 0; padding-top: 0; }
+ol.queue li.waits .qmain { opacity: .6; }
+.qpos { width: 22px; height: 22px; border-radius: 50%; background: var(--muted-bg); color: var(--muted);
+  display: grid; place-items: center; font-size: .86rem; font-weight: 600; flex: none; }
+.qmain { flex: 1; min-width: 0; }
+.qmain .sub { font-size: .86rem; }
+.qbtns { display: flex; gap: 4px; flex: none; }
+.empty { color: var(--muted); }
+.asks { margin-top: 10px; font-size: .93rem; color: var(--warn); }
+.num { font-variant-numeric: tabular-nums; }
+pre { white-space: pre-wrap; font-size: .9rem; margin: 0; overflow-wrap: anywhere; }
+/* log */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.filters select, .filters input { max-width: 100%; }
+.filters input { width: 150px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg button { border: 0; border-radius: 0; border-left: 1px solid var(--line); padding: 5px 10px; }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.log { max-height: 460px; overflow-y: auto; font-size: .93rem; }
+.log .ev { display: grid; grid-template-columns: auto 6.2em minmax(0, 1fr); gap: 4px 10px; padding: 5px 0 5px 8px;
+  border-top: 1px solid var(--line); border-left: 3px solid transparent; align-items: baseline; }
+.log .ev:first-child { border-top: 0; }
+.log time { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.log .kind { font-size: .79rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log .msg { min-width: 0; overflow-wrap: anywhere; }
+.log .meta { color: var(--muted); font-size: .86rem; margin-top: 1px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.ev.a-session { border-left-color: var(--info); } .ev.a-session .kind { color: var(--info); }
+.ev.a-power { border-left-color: var(--warn); } .ev.a-power .kind { color: var(--warn); }
+.ev.a-dc .kind, .ev.a-capture .kind { color: var(--muted); }
+.ev.a-queue { border-left-color: var(--violet); } .ev.a-queue .kind { color: var(--violet); }
+.ev.a-project { border-left-color: var(--ok); } .ev.a-project .kind { color: var(--ok); }
+.ev.l-warning .msg { color: var(--warn); }
+.ev.l-error { background: var(--bad-bg); border-left-color: var(--bad); }
+.ev.l-error .msg, .ev.l-error .kind { color: var(--bad); }
+/* live console */
+.console { font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace; font-size: .88rem;
+  max-height: 320px; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;
+  background: var(--muted-bg); border-radius: 8px; padding: 8px 10px; }
+.console .err { color: var(--bad); }
+.log-foot { display: flex; gap: 10px; align-items: center; margin-top: 10px; color: var(--muted); font-size: .86rem; }
+@media (max-width: 560px) {
+  .log .ev { grid-template-columns: auto minmax(0, 1fr); }
+  .log .kind { grid-column: 2; grid-row: 1; }
+  .log .msg { grid-column: 1 / -1; }
+}
+/* display menu */
+.menu { position: relative; }
+.menu > summary { list-style: none; cursor: pointer; border: 1px solid var(--line); border-radius: 8px;
+  padding: 5px 10px; color: var(--muted); }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu .panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 5; background: var(--card);
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  display: grid; gap: 10px; min-width: 230px; }
+.menu .panel label { display: grid; gap: 4px; color: var(--muted); font-size: .86rem; }
+#toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: calc(100% - 32px);
+  background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 500;
+  opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10; }
+#toast.show { opacity: 1; }
+#toast.err { background: var(--bad); color: #fff; }
+.readonly .ctl { display: none !important; }
+.screen { position: relative; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3;
+  max-width: 800px; margin: 0 auto; }
+.screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.screen img:fullscreen { background: #000; }
+/* picture adjuster: a crop box over the whole uncropped frame */
+.cropbox { position: absolute; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); outline: 2px solid var(--accent);
+  cursor: move; touch-action: none; }
+.cropbox:focus-visible { outline: 3px solid #fff; }
+.cropbox .h { position: absolute; width: 14px; height: 14px; background: var(--accent); border: 2px solid #fff;
+  border-radius: 3px; margin: -7px 0 0 -7px; }
+.cropbox .h[data-d="nw"] { left: 0; top: 0; cursor: nwse-resize; } .cropbox .h[data-d="ne"] { left: 100%; top: 0; cursor: nesw-resize; }
+.cropbox .h[data-d="sw"] { left: 0; top: 100%; cursor: nesw-resize; } .cropbox .h[data-d="se"] { left: 100%; top: 100%; cursor: nwse-resize; }
+.cropbox .h[data-d="n"] { left: 50%; top: 0; cursor: ns-resize; } .cropbox .h[data-d="s"] { left: 50%; top: 100%; cursor: ns-resize; }
+.cropbox .h[data-d="w"] { left: 0; top: 50%; cursor: ew-resize; } .cropbox .h[data-d="e"] { left: 100%; top: 50%; cursor: ew-resize; }
+.cropbox .guide { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(var(--accent), var(--accent)) center / 1px 100% no-repeat,
+              linear-gradient(var(--accent), var(--accent)) center / 100% 1px no-repeat; opacity: .5; }
+.adjust { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 14px; margin-top: 12px;
+  padding: 12px; border: 1px solid var(--line); border-radius: 10px; align-items: start; }
+@media (max-width: 640px) { .adjust { grid-template-columns: minmax(0, 1fr); } }
+.adjust canvas { width: 100%; aspect-ratio: 4 / 3; background: #000; border-radius: 6px; display: block; }
+.adjust .nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.adjust .nums label { display: grid; gap: 2px; color: var(--muted); font-size: .86rem; }
+.adjust .nums input { width: 100%; }
+.adjust p { margin: 8px 0 0; color: var(--muted); font-size: .86rem; }
+.calib { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.calib h3 { margin: 0 0 6px; font-size: 1rem; }
+.calib p { margin: 6px 0; color: var(--muted); font-size: .9rem; }
+.calib code { font-size: .86rem; background: var(--muted-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.calib .result { margin-top: 10px; padding: 10px; border-radius: 8px; background: var(--muted-bg); }
+.calib .result.err { background: var(--bad-bg); color: var(--bad); }
+.calib input[type=number] { width: 90px; }
+.capmsg { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; text-align: center;
+  color: #bbb; font-size: .93rem; }
+a.button { font-weight: 500; color: var(--fg); text-decoration: none; border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 12px; }
+a.button:hover { border-color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <h1>
+      <svg class="swirl" viewBox="0 0 32 32" aria-hidden="true"><path fill="var(--accent)" d="M16 2a14 14 0 1 0 14 14h-5.2A8.8 8.8 0 1 1 16 7.2a5.6 5.6 0 1 1-5.6 5.6H5.2A10.8 10.8 0 1 0 16 2Z"/></svg>
+      <span id="sitename">Dreamcast rig</span>
+    </h1>
+    <span class="conn" id="sitedesc" hidden></span>
+    <span class="conn" id="conn">live</span>
+    <div class="hdr-right">
+      <details class="menu" id="display">
+        <summary>Display</summary>
+        <div class="panel">
+          <label>Theme
+            <select id="opt-theme"><option value="auto">Match system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+          </label>
+          <label>Text size
+            <select id="opt-size"><option value="s">Small</option><option value="">Normal</option><option value="l">Large</option><option value="xl">Extra large</option></select>
+          </label>
+          <label>Log times
+            <select id="opt-times"><option value="clock">Clock time</option><option value="ago">Time ago</option></select>
+          </label>
+        </div>
+      </details>
+      <label class="who ctl">You <input id="name" placeholder="your name" maxlength="40" autocomplete="off"></label>
+    </div>
+  </header>
+  <div id="banners"></div>
+  <div class="grid">
+    <section class="card" id="console"></section>
+    <section class="card" id="queue"></section>
+    <section class="card span2" id="screen" hidden>
+      <details data-keep="screen" open>
+        <summary>Screen <span class="right" id="capstat"></span></summary>
+        <div class="screen" id="capscreen"><img id="capimg" alt="Live view of the Dreamcast's screen" hidden><div class="capmsg" id="capmsg"></div>
+          <div class="cropbox" id="cropbox" hidden tabindex="0" role="group"
+               aria-label="Crop area. Arrow keys move it; Alt+arrow keys resize it; Shift for bigger steps.">
+            <div class="guide"></div>
+            <span class="h" data-d="nw"></span><span class="h" data-d="n"></span><span class="h" data-d="ne"></span>
+            <span class="h" data-d="w"></span><span class="h" data-d="e"></span>
+            <span class="h" data-d="sw"></span><span class="h" data-d="s"></span><span class="h" data-d="se"></span>
+          </div></div>
+        <div class="row">
+          <button id="captoggle"></button>
+          <button id="capsound" hidden>Unmute</button>
+          <a class="button" href="/capture.jpg" download="dc-screenshot.jpg">Save screenshot</a>
+          <button id="capfull">Full screen</button>
+          <a class="button" href="/capture.m3u" title="Picture and sound in VLC (opens the downloaded playlist)">Open in VLC</a>
+          <button id="adjopen" class="ctl" title="Crop the picture, e.g. to centre an off-centre image">Adjust picture</button>
+          <button id="calopen" class="ctl" title="Measure how far the captured picture lags the console, so console lines line up with recordings">Calibrate timing</button>
+        </div>
+        <div class="calib" id="calib" hidden>
+          <h3>Console-to-screen timing <span id="cal-now"></span></h3>
+          <p>A recorded frame appears a little after the DC drew it. This delay lines up console lines with the
+            recording: clicking a line in a session shows the frame that delay later. Calibrating runs a short test
+            program that flashes the screen and announces each flash on the console, then measures the lag.</p>
+          <div id="cal-run"></div>
+          <div class="row">
+            <button id="cal-analyze" title="Measure the most recent session of project &quot;calibration&quot;">Analyse latest calibration</button>
+            <button id="cal-reset" hidden title="Use capture_delay_ms from the config again">Reset to config</button>
+            <button id="cal-close">Close</button>
+          </div>
+          <div id="cal-result"></div>
+        </div>
+        <div class="adjust" id="adjust" hidden>
+          <div><canvas id="adjpreview" width="320" height="240" aria-label="Preview of the cropped picture"></canvas>
+            <p>Preview of the result (scaled to <span id="adjout">640x480</span>).</p></div>
+          <div>
+            <div class="nums">
+              <label>Left % <input type="number" id="adj-x" step="0.1" min="0" max="90"></label>
+              <label>Top % <input type="number" id="adj-y" step="0.1" min="0" max="90"></label>
+              <label>Width % <input type="number" id="adj-w" step="0.1" min="10" max="100"></label>
+              <label>Height % <input type="number" id="adj-h" step="0.1" min="10" max="100"></label>
+            </div>
+            <div class="row">
+              <button id="adjsave" class="primary">Save</button>
+              <button id="adjcancel">Cancel</button>
+              <button id="adjfull" title="Select the whole frame">Whole frame</button>
+              <button id="adjreset" title="Forget the saved crop and use capture_filter from the config">Reset to config</button>
+            </div>
+            <p>The screen shows the whole uncropped frame while you adjust (everyone watching sees it too; it ends by
+              itself after 10 minutes). Drag the box or its handles, type values, or use the arrow keys on the box
+              (Alt + arrows resize, Shift for bigger steps). <span id="adjsource"></span></p>
+          </div>
+        </div>
+        <audio id="capaudio" preload="none"></audio>
+      </details>
+    </section>
+    <section class="card span2" id="concard">
+      <details data-keep="console" open>
+        <summary>Console <span class="right" id="constat"></span></summary>
+        <pre class="console" id="conlog" role="log" aria-label="Console output of the current or last session"></pre>
+        <div class="log-foot"><span id="conmsg"></span><a id="conopen" class="button" hidden>Open session</a></div>
+      </details>
+    </section>
+    <section class="card span2" id="logcard">
+      <details data-keep="log" open>
+        <summary>Activity <span class="right"><span class="tag" id="logcount"></span></span></summary>
+        <div class="filters" role="group" aria-label="Filter the activity log">
+          <div class="seg" id="f-type">
+            <button data-type="" aria-pressed="true">All</button>
+            <button data-type="sessions" aria-pressed="false">Sessions</button>
+            <button data-type="power" aria-pressed="false">Power &amp; DC</button>
+            <button data-type="queue" aria-pressed="false">Queue</button>
+            <button data-type="problems" aria-pressed="false">Problems</button>
+          </div>
+          <select id="f-project" aria-label="Project"><option value="">All projects</option></select>
+          <input id="f-user" list="users" placeholder="Any user" aria-label="User" autocomplete="off">
+          <datalist id="users"></datalist>
+          <input id="f-q" type="search" placeholder="Search text" aria-label="Search text" autocomplete="off">
+          <button id="f-clear" hidden>Clear filters</button>
+        </div>
+        <div class="log" id="log" aria-live="off"></div>
+        <div class="log-foot"><span id="logmsg"></span><button id="logmore" hidden>Show older</button></div>
+      </details>
+    </section>
+    <section class="card span2">
+      <details data-keep="guide">
+        <summary>Guide for agents and new machines</summary>
+        <pre id="guide"><!--DCMGR:GUIDE--></pre>
+      </details>
+    </section>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="application/json" id="initial"><!--DCMGR:STATE--></script>
+<script>
+"use strict";
+const TOKEN = document.querySelector('meta[name="dcmgr-token"]').content;
+const CONTROLS = document.querySelector('meta[name="dcmgr-controls"]').content === "1";
+if (!CONTROLS) document.body.classList.add("readonly");
+let S = null;
+try { S = JSON.parse(document.getElementById("initial").textContent); } catch (e) {}
+let holdMinutes = 30;
+let clockSkew = 0;          // server time - browser time, so countdowns match the server
+const $ = (id) => document.getElementById(id);
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+const nameInput = $("name");
+nameInput.value = store.get("dcmgr-name") || "";
+nameInput.addEventListener("change", () => store.set("dcmgr-name", nameInput.value.trim()));
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+const now = () => Date.now() / 1000 + clockSkew;
+function dur(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
+}
+function clock(t) {
+  const d = new Date(t * 1000), today = new Date();
+  const hm = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return d.toDateString() === today.toDateString() ? hm
+    : d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + hm;
+}
+function who() {
+  let n = nameInput.value.trim();
+  if (!n) {
+    n = (prompt("Your name (shown in the event log):") || "").trim();
+    if (!n) return null;
+    nameInput.value = n;
+    store.set("dcmgr-name", n);
+  }
+  return `${n} (web)`;
+}
+
+let toastTimer;
+function toast(msg, err) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "show" + (err ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = ""), err ? 6000 : 3000);
+}
+
+async function api(path, body) {
+  const owner = who();
+  if (!owner) return null;
+  const headers = { "Content-Type": "application/json" };
+  if (TOKEN) headers.Authorization = "Bearer " + TOKEN;
+  const r = await fetch(path, { method: "POST", headers, body: JSON.stringify({ owner, ...body }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `${r.status} ${r.statusText}`);
+  return j;
+}
+
+// --- display options and collapsible sections ---------------------------------
+const theme = $("opt-theme"), size = $("opt-size"), times = $("opt-times");
+theme.value = store.get("dcmgr-theme") || "auto";
+size.value = store.get("dcmgr-size") || "";
+times.value = store.get("dcmgr-times") || "clock";
+theme.addEventListener("change", () => {
+  store.set("dcmgr-theme", theme.value);
+  if (theme.value === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme.value;
+});
+size.addEventListener("change", () => {
+  store.set("dcmgr-size", size.value);
+  if (size.value) document.documentElement.dataset.size = size.value;
+  else delete document.documentElement.dataset.size;
+});
+times.addEventListener("change", () => { store.set("dcmgr-times", times.value); renderLog(); });
+document.addEventListener("click", (ev) => {  // close the display menu when clicking elsewhere
+  const m = $("display");
+  if (m.open && !m.contains(ev.target)) m.open = false;
+});
+// remember which sections are open (static ones here; the console's "Details" in renderConsole)
+for (const d of document.querySelectorAll("details[data-keep]")) {
+  const saved = store.get("dcmgr-open-" + d.dataset.keep);
+  if (saved !== null) d.open = saved === "1";
+  d.addEventListener("toggle", () => store.set("dcmgr-open-" + d.dataset.keep, d.open ? "1" : "0"));
+}
+let detailsOpen = store.get("dcmgr-open-details") === "1";
+
+// --- actions ---------------------------------------------------------------
+const holderName = () => (S.lease ? S.lease.owner : "");
+const ACTIONS = {
+  "nudge": () => {
+    const msg = prompt(`Message for ${holderName()}:`, "Could you release the DC when you get a chance?");
+    return msg === null ? null : ["/nudge", { message: msg }, "Request sent"];
+  },
+  "vacate": () => confirm(`Force quit ${holderName()}'s session?\n\nTheir run is stopped; the next in line gets the DC after a short drain.`)
+    && ["/vacate", { drain: true }, "Session ended"],
+  "hold": () => ["/hold", { minutes: holdMinutes }, null],
+  "extend": () => ["/hold/extend", { minutes: 15 }, "Hold extended by 15 min"],
+  "release-hold": () => ["/vacate", { drain: false }, "Hold released"],
+  "release-hold-keep": () => ["/vacate", { drain: false, keep: true }, "Hold released, DC left running"],
+  "evict": (d) => confirm(`Remove ${d.owner} from the queue?`) && ["/queue/evict", { id: d.id }, "Removed from queue"],
+  "move": (d) => ["/queue/move", { id: d.id, to: Number(d.to) }, null],
+  "reset": () => {
+    if (S.lease && !confirm(`${holderName()} is using the DC. End their session and power-cycle?`)) return null;
+    if (!S.lease && !confirm("Power-cycle the DC now? It takes about 30 s to come back.")) return null;
+    return ["/reset", { force: !!S.lease, async: true, reason: S.lease ? "force quit + power-cycle" : "from the web GUI" },
+      "Power-cycle started"];
+  },
+  "power-off": () => confirm(S.lease ? `${holderName()} is using the DC. End their session and switch it off?`
+      : "Switch the DC off? It powers back on automatically at the next lock.")
+    && ["/power", { on: false, force: !!S.lease }, "DC switched off"],
+  "power-on": () => ["/power", { on: true }, "DC switched on; it takes about 30 s to boot"],
+  "pause": (d) => {
+    const note = prompt(d.mode === "after_queue"
+      ? "Pause after the queue: everyone waiting now still gets a turn. Note (optional):"
+      : "Pause after the current session: nobody else gets the DC until you resume. Note (optional):", "");
+    return note === null ? null : ["/maintenance", { on: true, note, mode: d.mode }, "Queue paused"];
+  },
+  "resume": () => ["/maintenance", { on: false }, "Queue resumed"],
+  "filter": (d) => { setFilter(d.field, d.value); return null; },
+};
+
+document.addEventListener("click", async (ev) => {
+  const b = ev.target.closest("[data-act]");
+  if (!b || b.disabled) return;
+  const plan = ACTIONS[b.dataset.act](b.dataset);
+  if (!plan) return;
+  const [path, body, ok] = plan;
+  b.disabled = true;
+  try {
+    const r = await api(path, body);
+    if (r) {
+      if (b.dataset.act === "hold") toast(r.granted ? `The DC is yours for ${holdMinutes} min` : "Hold queued; you'll get the DC when it's your turn");
+      else if (ok) toast(ok);
+    }
+  } catch (e) { toast(e.message, true); }
+  b.disabled = false;
+  refresh();
+});
+document.addEventListener("change", (ev) => {
+  if (ev.target.id === "holdmin") holdMinutes = Number(ev.target.value);
+});
+
+// --- rendering ---------------------------------------------------------------
+const STATE_PILL = {
+  ready: ["ok", "ready"], checking: ["info pulse", "checking"], booting: ["info pulse", "booting"],
+  resetting: ["warn pulse", "power-cycling"], offline: ["bad", "not answering"], off: ["muted", "switched off"],
+  unknown: ["muted", "unknown"], unchecked: ["muted", "not checked"],
+};
+function btn(act, label, cls = "", data = {}, disabled = false, title = "") {
+  const attrs = Object.entries(data).map(([k, v]) => ` data-${k}="${esc(v)}"`).join("");
+  return `<button class="ctl ${cls}" data-act="${act}"${attrs}${title ? ` title="${esc(title)}" aria-label="${esc(title)}"` : ""}${disabled ? " disabled" : ""}>${label}</button>`;
+}
+// a project or user name that filters the activity log when clicked
+function chip(field, value, label) {
+  return `<button class="link" data-act="filter" data-field="${field}" data-value="${esc(value)}" title="Show only ${esc(value)} in the activity log">${esc(label ?? value)}</button>`;
+}
+const holdPicker = () => `<select id="holdmin" class="ctl" aria-label="Hold length">${[15, 30, 60, 120].map((m) =>
+  `<option value="${m}"${m === holdMinutes ? " selected" : ""}>${m} min</option>`).join("")}</select>`;
+
+function renderBanners() {
+  const out = [], m = S.maintenance;
+  if (m) {
+    const what = m.mode === "after_queue" && m.remaining
+      ? `<b>Pausing after the queue</b>: ${m.remaining} still to go, then new locks are paused`
+      : `<b>Queue paused</b>: nobody new gets the DC`;
+    out.push(`<div class="banner warn"><div class="grow">${what} (by ${esc(m.by)}, ${dur(now() - m.since)} ago${m.note ? ": " + esc(m.note) : ""}).</div>${btn("resume", "Resume")}</div>`);
+  }
+  if (S.draining_until) out.push(`<div class="banner info">Draining after a forced quit: the next holder gets the DC in about ${dur(S.draining_until - now())}.</div>`);
+  if (S.power_enabled && S.failed_boots >= S.config.max_failed_boots)
+    out.push(`<div class="banner bad"><b>Automatic resets paused.</b> The last ${S.failed_boots} power-cycles didn't bring dcload back. Check the DC, then power-cycle it here.</div>`);
+  $("banners").innerHTML = out.join("");
+}
+
+function renderConsole() {
+  const d = S.dc, l = S.lease, p = S.plug, [cls, label] = STATE_PILL[d.state] || ["muted", d.state];
+  const plug = !S.power_enabled ? "" : p.state === "on" ? `<span class="pill ok plain" title="${esc(S.power_control)}">power on</span>`
+    : p.state === "off" ? `<span class="pill muted plain" title="${esc(S.power_control)}">power off</span>` : "";
+  let who, session = "";
+  if (!l) {
+    const why = S.maintenance && !S.maintenance.remaining ? "queue paused" : S.reset_pending ? "waiting for the power-cycle"
+      : S.draining_until ? "draining" : "nobody is using it";
+    who = `<div class="big">Free</div><div class="sub">${why}</div>`;
+    session = `<div class="row ctl">${holdPicker()}${btn("hold", "Hold for hands-on use", "primary")}</div>`;
+  } else if (l.manual) {
+    who = `<div class="big">${chip("user", l.owner)} <span class="tag hold">hands-on</span></div>
+      <div class="sub">hold ends in <b class="num">${dur(l.expires - now())}</b> (at ${clock(l.expires)})</div>`;
+    session = `<div class="row">${btn("extend", "+15 min")}${btn("release-hold", "Release")}${btn("release-hold-keep", "Release, leave DC running")}</div>`;
+  } else {
+    who = `<div class="big">${chip("user", l.owner)}</div>
+      <div class="sub">${chip("project", l.project)} &middot; held for <span class="num">${dur(now() - l.acquired)}</span>${l.prepared ? "" : " &middot; locating DC"}</div>`;
+    session = `<div class="row">${btn("nudge", "Ask to release")}${btn("vacate", "Force quit", "danger", {}, false, "End this session; the next in line gets the DC after a short drain")}</div>`;
+  }
+  const busy = d.state === "resetting" || d.state === "booting" || S.reset_pending;
+  const power = !S.power_enabled ? "" : `<div class="row ctl"><span class="label">Power</span>
+      ${btn("reset", l ? "Force quit + power-cycle" : "Power-cycle", l ? "danger" : "", {}, busy)}
+      ${p.state === "off" ? btn("power-on", "Switch on", "", {}, busy) : btn("power-off", "Switch off", "danger", {}, busy)}</div>`;
+  const asks = l && l.asks.length ? `<div class="asks">Asked to release by ${l.asks.slice(-3).map((a) =>
+    `${esc(a.by)} (${dur(now() - a.t)} ago)`).join(", ")}</div>` : "";
+  const watts = p.power != null && p.power !== "unavailable" ? `<dt>Draw</dt><dd class="num">${esc(p.power)} ${esc(p.unit || "")}</dd>` : "";
+  const idle = S.config.idle_power_off_minutes ? `after ${S.config.idle_power_off_minutes} min unused` : "never";
+  $("console").innerHTML = `<h2>Dreamcast <span class="pill ${cls}">${label}</span> ${plug}</h2>
+    ${who}${session}${asks}${power}
+    <details class="more" id="details"${detailsOpen ? " open" : ""}><summary>Details</summary>
+      <dl class="kv">
+        <dt>Address</dt><dd class="num">${esc(d.ip)}</dd>
+        <dt>dcload</dt><dd>${esc(d.version || "unknown")}</dd>
+        <dt>Last seen</dt><dd>${d.last_seen ? clock(d.last_seen) + ` <span class="sub">(${dur(now() - d.last_seen)} ago)</span>` : "never"}</dd>
+        ${S.power_enabled ? `${watts}<dt>Resets (1 h)</dt><dd class="num">${S.resets_last_hour}${S.failed_boots ? ` &middot; ${S.failed_boots} failed in a row` : ""}</dd>
+        <dt>Auto power-off</dt><dd>${idle}</dd><dt>Power control</dt><dd>${esc(S.power_control)}</dd>`
+        : `<dt>Power</dt><dd>no power control configured: a hung DC needs switching off and on by hand</dd>`}
+        <dt>Server</dt><dd>dcmgr ${esc(S.version || "")}</dd>
+      </dl></details>`;
+  $("details").addEventListener("toggle", (e) => { detailsOpen = e.target.open; store.set("dcmgr-open-details", detailsOpen ? "1" : "0"); });
+}
+
+function renderQueue() {
+  const q = S.queue, n = q.length, m = S.maintenance;
+  const items = q.map((e, i) => {
+    const waits = e.waits;  // held back by a pause until someone resumes the queue
+    return `<li class="${waits ? "waits" : ""}"><span class="qpos">${i + 1}</span>
+    <div class="qmain"><div>${chip("user", e.owner)} ${e.hold ? `<span class="tag hold">${e.minutes} min hold</span>` : ""}${waits ? ' <span class="tag">until resume</span>' : ""}</div>
+      <div class="sub">${e.hold ? "hands-on" : chip("project", e.project)} &middot; waiting <span class="num">${dur(now() - e.since)}</span></div></div>
+    <div class="qbtns ctl">
+      ${btn("move", "&#8679;", "icon", { id: e.id, to: 0 }, i === 0, `Move ${e.owner} to the front`)}
+      ${btn("move", "&#8593;", "icon", { id: e.id, to: i - 1 }, i === 0, `Move ${e.owner} up`)}
+      ${btn("move", "&#8595;", "icon", { id: e.id, to: i + 1 }, i === n - 1, `Move ${e.owner} down`)}
+      ${btn("evict", "&#10005;", "icon danger", { id: e.id, owner: e.owner }, false, `Remove ${e.owner} from the queue`)}
+    </div></li>`;
+  }).join("");
+  const holdNext = S.lease ? `<div class="row ctl">${holdPicker()}${btn("hold", "Queue a hands-on hold")}</div>` : "";
+  const pause = m ? `<div class="row ctl"><span class="label">Paused</span>${btn("resume", "Resume queue", "primary")}</div>`
+    : `<div class="row ctl"><span class="label">Pause</span>
+        ${btn("pause", "After this session", "", { mode: "now" }, false, "Let the current session finish, then hand the DC to nobody until you resume")}
+        ${btn("pause", "After the queue", "", { mode: "after_queue" }, false, "Everyone waiting now still gets a turn; later arrivals wait until you resume")}</div>`;
+  $("queue").innerHTML = `<h2>Queue <span class="right"><span class="tag">${n} waiting</span>${m ? '<span class="pill warn plain">paused</span>' : ""}</span></h2>
+    ${n ? `<ol class="queue">${items}</ol>` : `<div class="empty">Nobody waiting.</div>`}${holdNext}<div class="divider"></div>${pause}`;
+}
+
+// --- activity log: sessions and events in one filterable list ------------------
+const TYPES = {
+  "": {},
+  sessions: { kind: "lease,hold" },
+  power: { kind: "power,dc,capture" },
+  queue: { kind: "queue,maintenance,project" },
+  problems: { level: "warning" },
+};
+const KIND_LABEL = {
+  "lease.granted": "started", "lease.released": "ended", "lease.expired": "expired", "lease.vacated": "force quit",
+  "lease.nudged": "asked", "hold.granted": "hold", "hold.queued": "queued", "hold.extended": "extended",
+  "hold.ended": "hold ended", "hold.released": "hold ended", "hold.vacated": "hold ended",
+  "queue.evicted": "removed", "queue.moved": "moved", "maintenance.on": "paused", "maintenance.off": "resumed",
+  "power.cycle": "power-cycle", "power.back": "back up", "power.failed": "failed", "power.on": "power on",
+  "power.off": "power off", "power.idle_off": "idle off", "dc.ip_changed": "new IP", "dc.multiple": "duplicate",
+  "dc.no_dcload": "no dcload", "project.registered": "project", "project.renamed": "renamed",
+  "project.deleted": "unregistered", "legacy": "event",
+  "capture.cropped": "picture", "capture.adjusting": "adjusting", "capture.adjust_timeout": "adjust ended",
+  "capture.delay": "timing", "capture.calibration": "calibrated",
+};
+function area(kind) {
+  const a = kind.split(".")[0];
+  return a === "lease" || a === "hold" ? "session" : a === "maintenance" ? "queue" : a;
+}
+const LOG = { type: store.get("dcmgr-log-type") || "", project: "", user: "", q: "", limit: 200, events: [], newest: 0, busy: false };
+// filters live in the URL too (#project=..&user=..&type=..&q=..), so a filtered view can be shared as a link
+function readHash() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  for (const k of ["type", "project", "user", "q"]) if (h.has(k)) LOG[k] = h.get(k);
+  if (!(LOG.type in TYPES)) LOG.type = "";
+  $("f-user").value = LOG.user; $("f-q").value = LOG.q;
+  ensureProjectOption(LOG.project); $("f-project").value = LOG.project;
+}
+function writeHash() {
+  const h = new URLSearchParams();
+  for (const k of ["type", "project", "user", "q"]) if (LOG[k]) h.set(k, LOG[k]);
+  const s = h.toString();
+  history.replaceState(null, "", s ? "#" + s : location.pathname + location.search);
+}
+
+function logQuery() {
+  const p = new URLSearchParams({ limit: LOG.limit, ...TYPES[LOG.type] || {} });
+  if (LOG.project) p.set("project", LOG.project);
+  if (LOG.user) p.set("user", LOG.user);
+  if (LOG.q) p.set("q", LOG.q);
+  return "/events?" + p;
+}
+async function loadLog() {
+  if (LOG.busy) { LOG.again = true; return; }
+  LOG.busy = true;
+  try {
+    const r = await fetch(logQuery(), { cache: "no-store" });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    LOG.events = j.events;
+    $("logmsg").textContent = "";
+  } catch (e) {
+    $("logmsg").textContent = "Couldn't load the activity log: " + e.message;
+  }
+  LOG.busy = false;
+  renderLog();
+  if (LOG.again) { LOG.again = false; loadLog(); }
+}
+function sessionMeta(e) {
+  // a finished session: how long, and how it ended
+  if (e.duration == null) return "";
+  const out = e.kind.endsWith(".released") || e.kind.endsWith(".ended") ? "ok" : e.kind.endsWith(".expired") ? "warn" : "bad";
+  return `<span class="pill ${out} plain">${dur(e.duration)}</span>`;
+}
+function renderLog() {
+  const ago = times.value === "ago";
+  const rows = LOG.events.slice().reverse().map((e) => {
+    const meta = [];
+    if (e.project) meta.push(chip("project", e.project));
+    if (e.owner) meta.push(chip("user", e.owner));
+    if (e.by && e.by !== e.owner) meta.push("by " + chip("user", e.by));
+    if (e.reason && !e.msg.includes(e.reason)) meta.push(esc(e.reason));
+    if (e.session && /^(lease|hold)\.(released|expired|ended|vacated|granted)$/.test(e.kind))
+      meta.push(`<a href="/session/${esc(e.session)}" title="Console output${S.recording && S.recording.enabled ? " and recording" : ""} of this session">session${e.lines ? ` (${e.lines} lines)` : ""}</a>`);
+    const when = ago ? dur(now() - e.t) + " ago" : clock(e.t);
+    return `<div class="ev a-${area(e.kind)} l-${esc(e.level)}">
+      <time datetime="${new Date(e.t * 1000).toISOString()}" title="${esc(new Date(e.t * 1000).toLocaleString())}">${when}</time>
+      <span class="kind" title="${esc(e.kind)}">${esc(KIND_LABEL[e.kind] || e.kind.split(".").pop())}</span>
+      <div class="msg">${esc(e.msg)} ${sessionMeta(e)}${meta.length ? `<div class="meta">${meta.join("")}</div>` : ""}</div>
+    </div>`;
+  });
+  const filtered = LOG.type || LOG.project || LOG.user || LOG.q;
+  writeHash();
+  $("log").innerHTML = rows.join("") || `<div class="empty">${filtered ? "Nothing matches these filters." : "No activity yet."}</div>`;
+  $("logcount").textContent = LOG.events.length + (LOG.events.length >= LOG.limit ? "+" : "") + " shown";
+  $("logmore").hidden = LOG.events.length < LOG.limit;
+  $("f-clear").hidden = !filtered;
+  for (const b of $("f-type").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.type === LOG.type));
+  // suggest users seen in the log
+  const users = new Set();
+  for (const e of LOG.events) { if (e.owner) users.add(e.owner); if (e.by) users.add(e.by); }
+  $("users").innerHTML = [...users].sort().map((u) => `<option value="${esc(u)}">`).join("");
+}
+function setFilter(field, value) {
+  if (field === "type") { LOG.type = value; store.set("dcmgr-log-type", value); }
+  if (field === "project") { LOG.project = value; ensureProjectOption(value); $("f-project").value = value; }
+  if (field === "user") { LOG.user = value; $("f-user").value = value; }
+  if (field === "q") LOG.q = value;
+  LOG.limit = 200;
+  const log = document.querySelector('details[data-keep="log"]');
+  if (field !== "type" && field !== "q" && !log.open) log.open = true;
+  if (field === "project" || field === "user") $("logcard").scrollIntoView({ behavior: "smooth", block: "start" });
+  loadLog();
+}
+$("f-type").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) setFilter("type", b.dataset.type); });
+$("f-project").addEventListener("change", (ev) => setFilter("project", ev.target.value));
+$("f-user").addEventListener("change", (ev) => setFilter("user", ev.target.value.trim()));
+let qTimer;
+$("f-q").addEventListener("input", (ev) => { clearTimeout(qTimer); qTimer = setTimeout(() => setFilter("q", ev.target.value.trim()), 300); });
+$("f-clear").addEventListener("click", () => {
+  Object.assign(LOG, { type: "", project: "", user: "", q: "", limit: 200 });
+  store.set("dcmgr-log-type", "");
+  $("f-project").value = ""; $("f-user").value = ""; $("f-q").value = "";
+  loadLog();
+});
+$("logmore").addEventListener("click", () => { LOG.limit = Math.min(LOG.limit * 2, 5000); loadLog(); });
+
+function ensureProjectOption(name) {
+  const sel = $("f-project");
+  if (name && ![...sel.options].some((o) => o.value === name)) sel.add(new Option(name, name));
+}
+async function loadProjects() {
+  try {
+    const r = await fetch("/projects", { cache: "no-store" });
+    if (!r.ok) return;
+    const list = (await r.json()).projects;
+    const sel = $("f-project"), cur = LOG.project;
+    const opt = (p) => `<option value="${esc(p.name)}">${esc(p.name)} (${p.sessions})</option>`;
+    const reg = list.filter((p) => p.registered), adhoc = list.filter((p) => !p.registered).slice(0, 60);
+    sel.innerHTML = `<option value="">All projects</option>`
+      + (reg.length ? `<optgroup label="Registered">${reg.map(opt).join("")}</optgroup>` : "")
+      + (adhoc.length ? `<optgroup label="${reg.length ? "Other" : "Projects"}">${adhoc.map(opt).join("")}</optgroup>` : "");
+    ensureProjectOption(cur);
+    sel.value = cur;
+  } catch (e) {}
+}
+
+// --- console: what the current session's loader prints, or the last session's output ------------
+const CON = { sid: null, after: 0, live: false, gen: 0, lines: 0 };
+const CON_KEEP = 500;  // lines kept on this page; the session page has all of them
+const CON_ERR = /\b(error|fail(ed|ure)?|panic|assert(ion)?|abort|exception|fatal)\b/i;
+function consoleTarget() {
+  // follow the live session; with none, show the most recent session that printed something
+  const want = S && S.lease ? S.lease.id : "latest";
+  if (want === CON.want) return;
+  CON.want = want;
+  const gen = ++CON.gen;
+  Object.assign(CON, { sid: null, after: 0, lines: 0 });
+  $("conlog").textContent = "";
+  consoleLoop(gen);
+}
+async function consoleLoop(gen) {
+  const live = CON.want !== "latest";
+  let url = live ? `/console?session=${CON.want}&tail=1&limit=${CON_KEEP}` : `/console?tail=1&limit=${CON_KEEP}`;
+  for (;;) {
+    let r;
+    try {
+      const resp = await fetch(url, { cache: "no-store" });
+      r = await resp.json();
+      if (!resp.ok) throw new Error(r.error || resp.statusText);
+    } catch (e) {
+      if (gen !== CON.gen) return;
+      $("constat").innerHTML = "";
+      $("conmsg").textContent = live ? "" : "No console output yet. dcm sends what the loader prints here.";
+      $("conopen").hidden = true;
+      if (live) { await new Promise((ok) => setTimeout(ok, 3000)); continue; }
+      return;
+    }
+    if (gen !== CON.gen) return;
+    CON.sid = r.session.uid; CON.live = r.live;
+    appendConsole(r.lines);
+    const who = `${esc(r.session.owner)} (${esc(r.session.project)})`;
+    $("constat").innerHTML = r.live ? `<span class="pill info">live</span>` : `<span class="tag">last session</span>`;
+    $("conmsg").innerHTML = `${who}${r.live ? "" : `, ended ${clock(r.session.end)}`} &middot; ${CON.lines} lines`;
+    const open = $("conopen");
+    open.hidden = false; open.href = `/session/${CON.sid}`;
+    if (!r.live) return;  // finished: nothing more will arrive
+    url = `/console?session=${CON.sid}&after=${CON.after}&limit=2000&wait=20`;
+  }
+}
+function appendConsole(lines) {
+  if (!lines.length) return;
+  const box = $("conlog");
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 30;
+  const frag = document.createDocumentFragment();
+  for (const l of lines) {
+    const span = document.createElement("span");
+    if (CON_ERR.test(l.text)) span.className = "err";
+    span.textContent = l.text + "\n";
+    frag.append(span);
+  }
+  box.append(frag);
+  while (box.childNodes.length > CON_KEEP) box.firstChild.remove();
+  CON.after = lines[lines.length - 1].seq;
+  CON.lines = CON.after;
+  if (atBottom) box.scrollTop = box.scrollHeight;
+}
+
+// --- live view: an MJPEG <img>, kept out of render() so the 2 s refresh doesn't restart it ----------
+const cap = { want: store.get("dcmgr-live") !== "0", on: false, retry: null };
+function capSet(on) {
+  const img = $("capimg");
+  clearTimeout(cap.retry);
+  cap.on = on;
+  if (on) {
+    img.src = "/capture.mjpg?t=" + Date.now();
+    $("capmsg").textContent = "Connecting...";
+  } else {
+    img.removeAttribute("src");
+    img.hidden = true;
+    $("capmsg").textContent = cap.want ? "Paused while this section or tab is hidden" : "Live view is off";
+  }
+  $("captoggle").textContent = cap.want ? "Stop live view" : "Show live view";
+}
+$("capimg").addEventListener("load", () => { $("capimg").hidden = false; $("capmsg").textContent = ""; });
+$("capimg").addEventListener("error", () => {
+  if (!cap.on) return;
+  $("capimg").hidden = true;
+  const why = S && S.capture && S.capture.error;
+  $("capmsg").textContent = "No picture" + (why ? ": " + why : "") + ". Retrying...";
+  cap.retry = setTimeout(() => cap.on && capSet(true), 5000);
+});
+$("captoggle").addEventListener("click", () => {
+  cap.want = !cap.want;
+  store.set("dcmgr-live", cap.want ? "1" : "0");
+  capSet(cap.want);
+});
+$("capfull").addEventListener("click", () => {
+  const img = $("capimg");
+  if (!cap.want) { cap.want = true; capSet(true); }
+  if (img.requestFullscreen) img.requestFullscreen().catch(() => {});
+});
+// sound: an endless MP3 stream; only started by a click (browsers block autoplay with sound)
+const snd = { on: false, retry: null };
+function sndSet(on) {
+  const a = $("capaudio");
+  clearTimeout(snd.retry);
+  snd.on = on;
+  if (on) {
+    a.src = "/capture.mp3?t=" + Date.now();
+    a.play().catch((e) => { if (e.name === "NotAllowedError") sndSet(false); });
+  } else {
+    a.pause();
+    a.removeAttribute("src");
+    a.load();  // drops the connection so the server can stop capturing
+  }
+  $("capsound").textContent = on ? "Mute" : "Unmute";
+}
+$("capsound").addEventListener("click", () => sndSet(!snd.on));
+$("capaudio").addEventListener("error", () => {
+  if (!snd.on) return;
+  toast("No sound from the capture device" + (S.audio && S.audio.error ? ": " + S.audio.error : "") + ". Retrying...", true);
+  snd.retry = setTimeout(() => snd.on && sndSet(true), 5000);
+});
+// browsers keep buffering a live stream, so audio slowly falls behind the picture; skip back to live
+setInterval(() => {
+  const a = $("capaudio");
+  if (snd.on && a.buffered.length) {
+    const end = a.buffered.end(a.buffered.length - 1);
+    if (end - a.currentTime > 1.0) a.currentTime = end - 0.2;
+  }
+}, 2000);
+// stop watching while the tab is hidden or the Screen section is collapsed, so the server can stop ffmpeg
+const screenDetails = document.querySelector('details[data-keep="screen"]');
+const screenVisible = () => !document.hidden && !$("screen").hidden && screenDetails.open;
+document.addEventListener("visibilitychange", () => { if (cap.want && !$("screen").hidden) capSet(screenVisible()); });
+screenDetails.addEventListener("toggle", () => {
+  if (cap.want) capSet(screenVisible());
+  if (!screenDetails.open && snd.on) sndSet(false);
+});
+
+// --- picture adjuster: crop the capture to centre an off-centre picture ------------------------------
+const ADJ = { on: false, crop: null, drag: null, raf: 0, since: 0 };
+function adjShow(on) {
+  ADJ.on = on;
+  ADJ.since = Date.now();
+  $("adjust").hidden = !on;
+  $("cropbox").hidden = !on;
+  $("adjopen").disabled = on;
+  if (on) { adjDraw(); adjPreview(); } else cancelAnimationFrame(ADJ.raf);
+}
+function adjClamp(c) {
+  const MIN = 0.1;
+  c.w = Math.min(1, Math.max(MIN, c.w)); c.h = Math.min(1, Math.max(MIN, c.h));
+  c.x = Math.min(1 - c.w, Math.max(0, c.x)); c.y = Math.min(1 - c.h, Math.max(0, c.y));
+  return c;
+}
+function adjDraw() {
+  const c = ADJ.crop, box = $("cropbox");
+  box.style.left = c.x * 100 + "%"; box.style.top = c.y * 100 + "%";
+  box.style.width = c.w * 100 + "%"; box.style.height = c.h * 100 + "%";
+  for (const k of ["x", "y", "w", "h"]) {
+    const el = $("adj-" + k);
+    if (document.activeElement !== el) el.value = (c[k] * 100).toFixed(1);
+  }
+}
+function adjPreview() {
+  // draw the cropped part of the live frame, as the saved crop will look
+  const img = $("capimg"), cv = $("adjpreview"), g = cv.getContext("2d"), c = ADJ.crop;
+  if (img.naturalWidth) {
+    try {
+      g.drawImage(img, c.x * img.naturalWidth, c.y * img.naturalHeight, c.w * img.naturalWidth,
+        c.h * img.naturalHeight, 0, 0, cv.width, cv.height);
+    } catch (e) {}
+  }
+  ADJ.raf = requestAnimationFrame(adjPreview);
+}
+async function adjStart() {
+  if (!cap.want) { cap.want = true; store.set("dcmgr-live", "1"); capSet(true); }
+  try {
+    const st = await api("/capture/adjust", { on: true });
+    if (!st) return;
+    ADJ.crop = Object.assign({}, st.crop);
+    $("adjout").textContent = st.output;
+    $("adjsource").textContent = st.source === "interactive" ? "Starting from the saved crop."
+      : st.source === "config" ? `Starting from the config's capture_filter (${st.config_filter}).` : "";
+    $("adjreset").hidden = st.source !== "interactive";
+    adjShow(true);
+    $("cropbox").focus();
+  } catch (e) { toast(e.message, true); }
+}
+async function adjEnd(save) {
+  try {
+    const r = save === "reset" ? await api("/capture/crop", { reset: true })
+      : save ? await api("/capture/crop", { crop: ADJ.crop })
+      : await api("/capture/adjust", { on: false });
+    if (!r) return;
+    toast(save === "reset" ? "Using the configured picture settings again" : save ? "Picture adjustment saved" : "Adjustment cancelled");
+    adjShow(false);
+  } catch (e) { toast(e.message, true); }
+}
+$("adjopen").addEventListener("click", adjStart);
+$("adjsave").addEventListener("click", () => adjEnd(true));
+$("adjcancel").addEventListener("click", () => adjEnd(false));
+$("adjreset").addEventListener("click", () => adjEnd("reset"));
+$("adjfull").addEventListener("click", () => { ADJ.crop = { x: 0, y: 0, w: 1, h: 1 }; adjDraw(); });
+for (const k of ["x", "y", "w", "h"]) {
+  $("adj-" + k).addEventListener("input", (ev) => {
+    const v = parseFloat(ev.target.value);
+    if (Number.isNaN(v)) return;
+    ADJ.crop[k] = v / 100; adjClamp(ADJ.crop); adjDraw();
+  });
+}
+$("cropbox").addEventListener("pointerdown", (ev) => {
+  const area = $("capscreen").getBoundingClientRect();
+  ADJ.drag = { dir: ev.target.dataset.d || "move", x0: ev.clientX, y0: ev.clientY, c0: Object.assign({}, ADJ.crop),
+               w: area.width, h: area.height };
+  $("cropbox").setPointerCapture(ev.pointerId);
+  ev.preventDefault();
+});
+$("cropbox").addEventListener("pointermove", (ev) => {
+  const d = ADJ.drag;
+  if (!d) return;
+  const dx = (ev.clientX - d.x0) / d.w, dy = (ev.clientY - d.y0) / d.h, c = Object.assign({}, d.c0);
+  if (d.dir === "move") { c.x += dx; c.y += dy; }
+  else {
+    // edges keep the opposite side where it is
+    if (d.dir.includes("w")) { const r = c.x + c.w; c.x = Math.min(r - 0.1, Math.max(0, c.x + dx)); c.w = r - c.x; }
+    if (d.dir.includes("e")) c.w = Math.min(1 - c.x, c.w + dx);
+    if (d.dir.includes("n")) { const b = c.y + c.h; c.y = Math.min(b - 0.1, Math.max(0, c.y + dy)); c.h = b - c.y; }
+    if (d.dir.includes("s")) c.h = Math.min(1 - c.y, c.h + dy);
+  }
+  ADJ.crop = adjClamp(c); adjDraw();
+});
+for (const t of ["pointerup", "pointercancel"]) $("cropbox").addEventListener(t, () => { ADJ.drag = null; });
+$("cropbox").addEventListener("keydown", (ev) => {
+  const step = ev.shiftKey ? 0.01 : 0.001, c = ADJ.crop;
+  const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[ev.key];
+  if (dir) {
+    if (ev.altKey) { c.w += dir[0] * step; c.h += dir[1] * step; } else { c.x += dir[0] * step; c.y += dir[1] * step; }
+    adjClamp(c); adjDraw(); ev.preventDefault();
+  } else if (ev.key === "Enter") { adjEnd(true); ev.preventDefault(); }
+  else if (ev.key === "Escape") { adjEnd(false); ev.preventDefault(); }
+});
+
+// --- calibrate timing: measure capture_delay_ms with tools/calibrate/calib.elf ------------------------------
+const CAL = { st: null, poll: null };
+async function calFetch() {
+  try {
+    const r = await fetch("/calibrate", { cache: "no-store" });
+    CAL.st = await r.json();
+  } catch (e) { return; }
+  calRender();
+  const job = CAL.st.job, busy = job && ["queued", "running", "analyzing"].includes(job.state);
+  clearTimeout(CAL.poll);
+  if (busy && !$("calib").hidden) CAL.poll = setTimeout(calFetch, 1000);
+}
+function calResultHTML(r) {
+  if (!r) return "";
+  const range = r.min_ms === r.max_ms ? `${r.min_ms} ms` : `${r.min_ms}-${r.max_ms} ms`;
+  const how = r.exact_window_ms ? `any value from ${Math.ceil(r.exact_window_ms[0])} to ${Math.floor(r.exact_window_ms[1])} ms lines up every flash exactly`
+    : `the capture's timing varies by more than a frame, so this is the smallest value at which every line's frame already shows its change`;
+  return `<div class="result"><b>${r.matched} of ${r.flashes} flashes</b> found;
+      the picture lagged the DC by ${range} (one frame every ${Math.round(r.frame_ms)} ms).
+      <b>Recommended: ${r.recommended_ms} ms</b> (${how}).
+      <div class="row ctl"><button class="primary" id="cal-apply" data-ms="${r.recommended_ms}">Apply ${r.recommended_ms} ms</button>
+        <label>or <input type="number" id="cal-manual" min="0" max="2000" step="5" value="${r.recommended_ms}" aria-label="Delay in ms"> ms
+        <button id="cal-apply-manual">Apply</button></label>
+        ${r.session ? `<a href="/session/${esc(r.session)}">calibration session</a>` : ""}</div></div>`;
+}
+function calRender() {
+  const st = CAL.st;
+  if (!st) return;
+  $("cal-now").innerHTML = `<span class="pill ${st.source === "calibrated" ? "ok" : "muted"} plain">${st.delay_ms} ms &middot; ${st.source === "calibrated" ? "calibrated" : "from config"}</span>`;
+  $("cal-reset").hidden = st.source !== "calibrated";
+  const job = st.job, busy = job && ["queued", "running", "analyzing"].includes(job.state);
+  let run;
+  if (!st.recording) {
+    run = `<p>Calibration needs session recordings: a capture device and <code>"record": true</code>.</p>`;
+  } else if (st.can_run) {
+    const state = !job ? "" : job.state === "queued" ? "Waiting for the DC (queued like any user)..."
+      : job.state === "running" ? "Running the test program on the DC (about 30 s)..."
+      : job.state === "analyzing" ? "Measuring the recording..."
+      : job.state === "failed" ? `<span style="color: var(--bad)">Failed: ${esc(job.error)}</span>` : "Done.";
+    run = `<div class="row ctl"><button class="primary" id="cal-run-btn"${busy ? " disabled" : ""}>Run calibration</button>
+      <span class="sub">${state}</span></div>
+      <p>It takes the DC like any user (about 40 s), so it waits if someone is using it.</p>`;
+  } else {
+    run = `<p>Run the test program from a dev machine, as project <code>calibration</code>:
+      download <a href="/calibrate/calib.elf" download="calib.elf">calib.elf</a>, then
+      <code>dcm load calib.elf -p calibration</code> (with dc-load-ip 3.x:
+      <code>dcm run -p calibration -- kos-tool -t {ip} -x calib.elf</code>). When it's done, analyse it here.
+      ${st.loader ? "" : `To run it from this page instead, install a loader on the server (<code>install.sh --with-kos-tool</code>).`}</p>`;
+  }
+  $("cal-run").innerHTML = run;
+  const result = job && job.state === "done" ? job.result : st.last;
+  if (!$("cal-result").dataset.error) $("cal-result").innerHTML = calResultHTML(result);
+}
+async function calPost(path, body, ok) {
+  try {
+    const r = await api(path, body || {});
+    if (r && ok) toast(ok);
+    return r;
+  } catch (e) { toast(e.message, true); return null; }
+}
+$("calopen").addEventListener("click", () => { $("calib").hidden = false; $("calopen").disabled = true; calFetch(); });
+$("cal-close").addEventListener("click", () => { $("calib").hidden = true; $("calopen").disabled = false; clearTimeout(CAL.poll); });
+$("cal-analyze").addEventListener("click", async (ev) => {
+  ev.target.disabled = true;
+  delete $("cal-result").dataset.error;
+  $("cal-result").innerHTML = `<div class="result">Measuring the latest calibration session...</div>`;
+  try {
+    const r = await api("/calibrate/analyze", {});
+    if (r) $("cal-result").innerHTML = calResultHTML(r);
+  } catch (e) {
+    $("cal-result").dataset.error = "1";
+    $("cal-result").innerHTML = `<div class="result err">${esc(e.message)}</div>`;
+  }
+  ev.target.disabled = false;
+});
+$("cal-reset").addEventListener("click", async () => {
+  if (await calPost("/calibrate/apply", { reset: true }, "Using the configured delay again")) calFetch();
+});
+$("calib").addEventListener("click", async (ev) => {
+  if (ev.target.id === "cal-run-btn") {
+    delete $("cal-result").dataset.error;
+    if (await calPost("/calibrate/run", {}, "Calibration started")) calFetch();
+  } else if (ev.target.id === "cal-apply" || ev.target.id === "cal-apply-manual") {
+    const ms = ev.target.id === "cal-apply" ? Number(ev.target.dataset.ms) : Number($("cal-manual").value);
+    if (await calPost("/calibrate/apply", { delay_ms: ms }, `Console-to-screen delay set to ${ms} ms`)) calFetch();
+  }
+});
+
+function renderScreen() {
+  const c = S.capture || {};
+  const card = $("screen");
+  if (!c.enabled) { card.hidden = true; if (cap.on) capSet(false); if (snd.on) sndSet(false); return; }
+  $("capsound").hidden = !(S.audio && S.audio.enabled);
+  if (card.hidden) { card.hidden = false; capSet(cap.want && screenVisible()); }
+  $("capstat").innerHTML = c.error && !c.running ? `<span class="pill bad">error</span>`
+    : c.running ? `<span class="pill ok">live${c.rate ? " &middot; " + c.rate + " fps" : ""}</span>`
+    : `<span class="pill muted">idle</span>`;
+  if (c.adjusting) $("capstat").innerHTML += ` <span class="pill warn">being adjusted</span>`;
+  // (a status fetched just before adjusting started still says "not adjusting": give it a moment)
+  if (ADJ.on && !c.adjusting && Date.now() - ADJ.since > 5000) { adjShow(false); toast("The picture adjustment ended (saved, cancelled or timed out)"); }
+}
+
+function render() {
+  if (!S) return;
+  const site = S.config.site_name || "Dreamcast rig";
+  if ($("sitename").textContent !== site) { $("sitename").textContent = site; document.title = site; }
+  $("sitedesc").textContent = S.config.site_description || "";
+  $("sitedesc").hidden = !S.config.site_description;
+  renderScreen();
+  // don't rebuild controls out from under someone using them
+  const a = document.activeElement;
+  if (a && (a.id === "holdmin" || $("console").contains(a) && a.tagName === "SUMMARY")) return;
+  renderBanners(); renderConsole(); renderQueue();
+}
+
+async function refresh() {
+  try {
+    const r = await fetch("/status", { cache: "no-store" });
+    S = await r.json();
+    clockSkew = S.now - Date.now() / 1000;
+    $("conn").textContent = "live";
+    $("conn").className = "conn";
+  } catch (e) {
+    $("conn").textContent = "connection lost - retrying";
+    $("conn").className = "conn down";
+  }
+  render();
+  // new activity: reload the log (with its filters) when the newest event moves on
+  const newest = S && S.events.length ? S.events[S.events.length - 1].t : 0;
+  if (newest > LOG.newest) { LOG.newest = newest; loadLog(); }
+  else if (times.value === "ago") renderLog();
+  consoleTarget();
+}
+if (S) {
+  clockSkew = S.now - Date.now() / 1000;
+  LOG.newest = S.events.length ? S.events[S.events.length - 1].t : 0;
+}
+readHash();
+window.addEventListener("hashchange", () => { readHash(); loadLog(); });
+render();
+loadLog();
+loadProjects();
+consoleTarget();
+setInterval(refresh, 2000);
+setInterval(loadProjects, 60000);
+</script>
+</body>
+</html>

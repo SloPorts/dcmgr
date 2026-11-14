@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+# local configs and runtime state; dcmgr.example.json is the template
+dcmgr.json
+secrets.env
+*state.json
+*.tmp
+events.jsonl
+*.db
+*.db-wal
+*.db-shm
+# build output of tools/calibrate
+tools/calibrate/*.elf
+!tools/calibrate/calib.elf
+tools/calibrate/*.o

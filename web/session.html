@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="dcmgr-token" content="<!--DCMGR:TOKEN-->">
+<meta name="dcmgr-controls" content="<!--DCMGR:CONTROLS-->">
+<title>Session</title>
+<script>
+try {
+  const t = localStorage.getItem("dcmgr-theme"), z = localStorage.getItem("dcmgr-size");
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  if (z) document.documentElement.dataset.size = z;
+} catch (e) {}
+</script>
+<style>
+:root {
+  --bg: #f4f3ef; --card: #ffffff; --fg: #1c1c1a; --muted: #6d6c66; --line: #e2e0d8;
+  --accent: #e8590c; --accent-fg: #ffffff; --hl: #fff1d6;
+  --ok: #2b8a3e; --info: #1c6dd0; --warn: #c46a00; --bad: #c92a2a;
+  --ok-bg: #e6f4ea; --info-bg: #e5effc; --warn-bg: #fdf0dc; --bad-bg: #fde8e8; --muted-bg: #eeede8;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141413; --card: #1e1e1c; --fg: #e9e8e3; --muted: #9a9890; --line: #33322e; --hl: #3a2f17;
+    --ok: #69db7c; --info: #74b3ff; --warn: #ffb347; --bad: #ff8787;
+    --ok-bg: #1d3323; --info-bg: #1a2a40; --warn-bg: #3a2c14; --bad-bg: #3d1f1f; --muted-bg: #2a2a27;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141413; --card: #1e1e1c; --fg: #e9e8e3; --muted: #9a9890; --line: #33322e; --hl: #3a2f17;
+  --ok: #69db7c; --info: #74b3ff; --warn: #ffb347; --bad: #ff8787;
+  --ok-bg: #1d3323; --info-bg: #1a2a40; --warn-bg: #3a2c14; --bad-bg: #3d1f1f; --muted-bg: #2a2a27;
+}
+html { font-size: 14px; }
+html[data-size="s"] { font-size: 13px; } html[data-size="l"] { font-size: 16px; } html[data-size="xl"] { font-size: 18px; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }  /* class rules with display: must not show hidden elements */
+body { margin: 0; background: var(--bg); color: var(--fg); font: 1rem/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1400px; margin: 0 auto; padding: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 12px; }
+header h1 { font-size: 1.3rem; margin: 0; }
+a { color: var(--info); }
+.back { text-decoration: none; color: var(--muted); }
+.meta { color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; width: 100%; }
+.meta b { color: var(--fg); font-weight: 600; }
+.pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 10px; font-size: .93rem; font-weight: 600; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.info { background: var(--info-bg); color: var(--info); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); } .pill.bad { background: var(--bad-bg); color: var(--bad); }
+.pill.muted { background: var(--muted-bg); color: var(--muted); }
+.layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 12px; align-items: start; }
+.layout.textonly { grid-template-columns: minmax(0, 1fr); }
+.layout.textonly .media { display: none; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+.media { position: sticky; top: 12px; }
+@media (max-width: 900px) { .media { position: static; } }
+.screen { background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; display: grid; place-items: center; }
+.screen video, .screen img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.note { color: var(--muted); font-size: .93rem; margin-top: 8px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.bar input[type=search] { flex: 1; min-width: 140px; }
+.bar label { color: var(--muted); display: flex; gap: 4px; align-items: center; }
+button, input, select { font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; }
+button { cursor: pointer; } button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.console { font-family: var(--mono); font-size: .9rem; max-height: calc(100vh - 170px); overflow-y: auto; border-top: 1px solid var(--line); }
+@media (max-width: 900px) { .console { max-height: 70vh; } }
+.ln { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: 10px; padding: 1px 4px; cursor: pointer; border-radius: 4px; }
+.ln:hover { background: var(--muted-bg); }
+.ln.cur { background: var(--hl); }
+.ln .ts { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.ln .tx { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ln .shot { color: var(--muted); text-decoration: none; visibility: hidden; padding: 0 4px; }
+.ln:hover .shot, .ln.cur .shot { visibility: visible; }
+.ln.err .tx { color: var(--bad); }
+.empty { color: var(--muted); padding: 10px 4px; }
+mark { background: var(--warn-bg); color: inherit; }
+#toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--fg); color: var(--bg);
+  padding: 10px 16px; border-radius: 10px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+#toast.show { opacity: 1; } #toast.err { background: var(--bad); color: #fff; }
+.readonly .ctl { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="/" id="back">&larr; Rig</a>
+    <h1 id="title">Session</h1>
+    <span id="state"></span>
+    <button id="pin" class="ctl" hidden></button>
+    <div class="meta" id="meta"></div>
+  </header>
+  <div class="layout" id="layout">
+    <section class="card media">
+      <div class="screen" id="screen"></div>
+      <div class="note" id="medianote"></div>
+    </section>
+    <section class="card">
+      <div class="bar">
+        <input type="search" id="filter" placeholder="Filter lines" aria-label="Filter console lines" autocomplete="off">
+        <label><input type="checkbox" id="follow" checked> Follow</label>
+        <button id="download">Download .txt</button>
+      </div>
+      <div class="console" id="console" role="log" aria-label="Console output"></div>
+      <div class="note" id="consolenote"></div>
+    </section>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+const TOKEN = document.querySelector('meta[name="dcmgr-token"]').content;
+const CONTROLS = document.querySelector('meta[name="dcmgr-controls"]').content === "1";
+if (!CONTROLS) document.body.classList.add("readonly");
+const UID = location.pathname.split("/").filter(Boolean).pop();
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+const MAX_DOM = 20000;  // lines rendered at once; filtering searches all of them
+
+const P = { info: null, live: false, rec: null, delay: 0.1, lines: [], after: 0, cur: -1 };
+
+function dur(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}h ${m}m` : m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
+}
+function offset(sec) {  // m:ss.mmm since the session began
+  const neg = sec < 0; sec = Math.abs(sec);
+  const m = Math.floor(sec / 60), s = (sec % 60).toFixed(3).padStart(6, "0");
+  return (neg ? "-" : "") + `${m}:${s}`;
+}
+const when = (t) => new Date(t * 1000).toLocaleString();
+let toastTimer;
+function toast(msg, err) {
+  const t = $("toast"); t.textContent = msg; t.className = "show" + (err ? " err" : "");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.className = ""), err ? 6000 : 3000);
+}
+async function getJSON(url) {
+  const r = await fetch(url, { cache: "no-store" });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || r.statusText), { status: r.status });
+  return j;
+}
+
+// --- header ---------------------------------------------------------------------
+const OUTCOME = { released: "ok", ended: "ok", expired: "warn", vacated: "bad" };
+function renderHeader() {
+  const i = P.info;
+  document.title = `${i.project} session - ${P.site || "dcmgr"}`;
+  $("title").textContent = `${i.project}`;
+  $("state").innerHTML = P.live ? `<span class="pill info">live</span>`
+    : `<span class="pill ${OUTCOME[i.outcome] || "muted"}">${esc(i.outcome || "ended")}</span>`;
+  const end = i.end || Date.now() / 1000;
+  $("meta").innerHTML = [
+    `<span><b>${esc(i.owner)}</b>${i.manual ? " (hands-on)" : ""}</span>`,
+    `<span>started ${esc(when(i.start))}</span>`,
+    `<span>${P.live ? "running for" : "lasted"} <b>${dur(end - i.start)}</b></span>`,
+    `<span><b>${P.lines.length}</b> console lines</span>`,
+    i.how && !P.live && i.how !== i.outcome ? `<span>${esc(i.how)}</span>` : "",
+    `<span>session ${esc(UID)}</span>`,
+  ].join("");
+  const pin = $("pin");
+  pin.hidden = P.live;
+  pin.textContent = i.pinned ? "Unpin" : "Pin (keep)";
+  pin.title = i.pinned ? "Let this session's recording and output expire like the rest"
+    : "Keep this session's recording and output past the size and age limits";
+}
+
+// --- media ----------------------------------------------------------------------
+function renderMedia() {
+  const scr = $("screen"), note = $("medianote");
+  if (P.live) {
+    if (!P.capture) { $("layout").classList.add("textonly"); return; }
+    if (!scr.querySelector("img")) scr.innerHTML = `<img alt="Live view of the Dreamcast's screen" src="/capture.mjpg?t=${Date.now()}">`;
+    note.textContent = "Live picture. The recording opens here when the session ends.";
+    return;
+  }
+  if (P.rec) {
+    $("layout").classList.remove("textonly");
+    if (!scr.querySelector("video")) {
+      scr.innerHTML = `<video id="video" controls preload="metadata" src="/recordings/${UID}.mp4"></video>`;
+      $("video").addEventListener("timeupdate", syncToVideo);
+      $("video").addEventListener("seeked", syncToVideo);
+    }
+    note.innerHTML = `Recording ${dur(P.rec.duration)}${P.rec.audio ? " with sound" : ""}, ${(P.rec.bytes / 2 ** 20).toFixed(1)} MB.
+      Click a line to jump to it; &#128247; opens the screen at that line.`;
+  } else if (P.recPending) {
+    note.textContent = "Saving the recording...";
+  } else {
+    $("layout").classList.add("textonly");
+  }
+}
+const lineToVideo = (t) => t - P.rec.t0 + P.delay;
+function seekTo(i) {
+  const v = $("video");
+  if (!v || !P.rec) return;
+  v.currentTime = Math.max(0, Math.min(lineToVideo(P.lines[i].t), P.rec.duration - 0.05));
+  setCurrent(i, false);
+}
+function syncToVideo() {
+  // the line that was printed last at the moment the video shows
+  const wall = P.rec.t0 + $("video").currentTime - P.delay;
+  let lo = 0, hi = P.lines.length - 1, at = -1;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (P.lines[mid].t <= wall) { at = mid; lo = mid + 1; } else hi = mid - 1; }
+  setCurrent(at, $("follow").checked);
+}
+function setCurrent(i, scroll) {
+  if (i === P.cur) return;
+  const old = $("console").querySelector(".ln.cur");
+  if (old) old.classList.remove("cur");
+  P.cur = i;
+  const el = i >= 0 && $("console").querySelector(`[data-i="${i}"]`);
+  if (el) { el.classList.add("cur"); if (scroll) el.scrollIntoView({ block: "nearest" }); }
+}
+
+// --- console --------------------------------------------------------------------
+const ERR = /\b(error|fail(ed|ure)?|panic|assert(ion)?|abort|exception|segfault|fatal)\b/i;
+function lineHTML(l, i, q) {
+  let text = esc(l.text);
+  if (q) text = text.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/&/g, "&amp;").replace(/</g, "&lt;"), "gi"), (m) => `<mark>${m}</mark>`);
+  const shot = P.rec ? `<a class="shot" href="/sessions/${UID}/frame.jpg?t=${l.t}" target="_blank" rel="noopener" title="Screen at this line" aria-label="Screen at this line">&#128247;</a>` : "<span></span>";
+  return `<div class="ln${ERR.test(l.text) ? " err" : ""}${i === P.cur ? " cur" : ""}" data-i="${i}"><span class="ts">${offset(l.t - P.info.start)}</span><span class="tx">${text || "&nbsp;"}</span>${shot}</div>`;
+}
+function renderConsole() {
+  const q = $("filter").value.trim().toLowerCase();
+  const box = $("console");
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  let idx = P.lines.map((l, i) => i);
+  if (q) idx = idx.filter((i) => P.lines[i].text.toLowerCase().includes(q));
+  const shown = idx.length > MAX_DOM ? idx.slice(-MAX_DOM) : idx;
+  box.innerHTML = shown.map((i) => lineHTML(P.lines[i], i, q)).join("")
+    || `<div class="empty">${P.lines.length ? "No lines match." : P.live ? "Nothing printed yet." : "This session printed nothing (or ran with --no-console)."}</div>`;
+  $("consolenote").textContent = idx.length > MAX_DOM ? `Showing the last ${MAX_DOM} of ${idx.length} lines; filter to find older ones, or download the whole log.`
+    : q ? `${idx.length} of ${P.lines.length} lines match.` : "";
+  if (P.live && $("follow").checked && atBottom) box.scrollTop = box.scrollHeight;
+}
+$("console").addEventListener("click", (ev) => {
+  if (ev.target.closest(".shot")) return;
+  const row = ev.target.closest(".ln");
+  if (row) seekTo(Number(row.dataset.i));
+});
+let fTimer;
+$("filter").addEventListener("input", () => { clearTimeout(fTimer); fTimer = setTimeout(renderConsole, 200); });
+$("follow").checked = store.get("dcmgr-session-follow") !== "0";
+$("follow").addEventListener("change", () => store.set("dcmgr-session-follow", $("follow").checked ? "1" : "0"));
+$("download").addEventListener("click", () => {
+  const text = P.lines.map((l) => `${offset(l.t - P.info.start)}  ${l.text}`).join("\n") + "\n";
+  const a = Object.assign(document.createElement("a"), {
+    href: URL.createObjectURL(new Blob([text], { type: "text/plain" })), download: `session-${UID}.txt` });
+  document.body.append(a); a.click(); a.remove();
+});
+$("pin").addEventListener("click", async () => {
+  let n = (store.get("dcmgr-name") || "").trim();
+  if (!n) { n = (prompt("Your name (shown in the event log):") || "").trim(); if (!n) return; store.set("dcmgr-name", n); }
+  const headers = { "Content-Type": "application/json" };
+  if (TOKEN) headers.Authorization = "Bearer " + TOKEN;
+  const r = await fetch("/sessions/pin", { method: "POST", headers,
+    body: JSON.stringify({ owner: `${n} (web)`, uid: UID, pinned: !P.info.pinned }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) return toast(j.error || r.statusText, true);
+  P.info.pinned = j.pinned;
+  toast(j.pinned ? "Pinned: kept past the size and age limits" : "Unpinned");
+  renderHeader();
+});
+
+// --- loading --------------------------------------------------------------------
+async function loadFinished() {
+  const s = (await getJSON(`/sessions?uid=${UID}&limit=1`)).sessions[0];
+  if (s) { P.info = s; P.rec = s.recording; }
+  return s;
+}
+async function loadConsole() {
+  for (;;) {
+    const r = await getJSON(`/console?session=${UID}&after=${P.after}&limit=10000`);
+    if (!P.info || r.live) P.info = Object.assign(P.info || {}, r.session);
+    P.live = r.live;
+    P.lines.push(...r.lines);
+    if (r.lines.length) P.after = r.lines[r.lines.length - 1].seq;
+    if (r.lines.length < 10000) return;
+  }
+}
+async function follow() {
+  // long-poll new lines until the session ends, then switch to the recording
+  while (P.live) {
+    try {
+      const r = await getJSON(`/console?session=${UID}&after=${P.after}&limit=10000&wait=20`);
+      P.lines.push(...r.lines);
+      if (r.lines.length) P.after = r.lines[r.lines.length - 1].seq;
+      P.live = r.live;
+      if (r.lines.length) renderConsole();
+      renderHeader();
+    } catch (e) { await new Promise((ok) => setTimeout(ok, 3000)); }
+  }
+  $("screen").innerHTML = "";
+  P.recPending = P.capture;
+  for (let i = 0; i < 40; i++) {
+    await loadFinished().catch(() => null);
+    if (P.rec || !P.capture) break;
+    renderMedia();
+    await new Promise((ok) => setTimeout(ok, 1500));
+  }
+  P.recPending = false;
+  renderHeader(); renderMedia(); renderConsole();
+}
+
+(async () => {
+  try {
+    const st = await getJSON("/status");
+    $("back").textContent = "← " + ((st.config && st.config.site_name) || "Rig");
+    P.site = (st.config && st.config.site_name) || "dcmgr";
+    P.delay = ((st.recording && st.recording.delay_ms) || 0) / 1000;
+    P.capture = !!(st.recording && st.recording.enabled);
+    await loadFinished().catch(() => null);
+    await loadConsole().catch((e) => { if (!P.info) throw e; });
+  } catch (e) {
+    $("title").textContent = "Session not found";
+    $("console").innerHTML = `<div class="empty">${esc(e.message)}</div>`;
+    $("layout").classList.add("textonly");
+    return;
+  }
+  renderHeader(); renderMedia(); renderConsole();
+  if (P.live) { $("console").scrollTop = $("console").scrollHeight; follow(); }
+  else if (P.rec && location.hash.startsWith("#t=")) {  // links to a moment: /session/<id>#t=<unix time>
+    const t = Number(location.hash.slice(3)), v = $("video");
+    v.addEventListener("loadedmetadata", () => { v.currentTime = Math.max(0, t - P.rec.t0 + P.delay); }, { once: true });
+    // highlight the line for that moment right away (don't wait for the video to seek)
+    let at = -1;
+    P.lines.forEach((l, i) => { if (l.t <= t + 1e-6) at = i; });
+    setCurrent(at, true);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+#!/sbin/openrc-run
+# OpenRC service for dcmgr (Alpine). Installed to /etc/init.d/dcmgr by deploy/install.sh,
+# which also rewrites the python3 path if it isn't /usr/bin/python3.
+
+name="dcmgr"
+description="Dreamcast lock / discovery / reset manager"
+command="/usr/bin/python3"
+command_args="/opt/dcmgr/dcmgr_server.py -c /etc/dcmgr/dcmgr.json"
+command_user="dcmgr:dcmgr"
+# "extra_ports": [80] without root (needs OpenRC built with libcap, as Alpine's is)
+capabilities="^cap_net_bind_service"
+pidfile="/run/${RC_SVCNAME}.pid"
+directory="/var/lib/dcmgr"
+output_log="/var/log/dcmgr.log"
+error_log="/var/log/dcmgr.log"
+# restart if it ever dies
+supervisor=supervise-daemon
+respawn_delay=5
+respawn_max=0
+
+depend() {
+	need net
+	after firewall
+}
+
+start_pre() {
+	checkpath -d -o dcmgr:dcmgr -m 0750 /var/lib/dcmgr
+	checkpath -f -o dcmgr:dcmgr -m 0640 /var/log/dcmgr.log
+	# optional DCMGR_API_TOKEN / DCMGR_HA_TOKEN, as with systemd's EnvironmentFile
+	if [ -f /etc/dcmgr/secrets.env ]; then
+		set -a
+		. /etc/dcmgr/secrets.env
+		set +a
+	fi
+	# installs before 1.0 lowered the unprivileged port limit instead of using capabilities; LXC containers
+	# often don't run the sysctl service at boot, so keep applying that drop-in while it exists
+	[ -f /etc/sysctl.d/dcmgr.conf ] && sysctl -q -p /etc/sysctl.d/dcmgr.conf || true
+}

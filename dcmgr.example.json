@@ -1,0 +1,38 @@
+{
+  "console_id": "dc1",
+  "listen": "0.0.0.0",
+  "port": 8731,
+  "extra_ports": [80],
+  "api_token": "change-me",
+  "web_controls": true,
+
+  "dc_ip": "192.168.1.50",
+  "dc_alt_ips": [],
+  "dc_mac": "",
+  "subnet": "192.168.1.0/24",
+  "probe": "vers",
+  "lease_ttl": 60,
+  "recover_on_release": true,
+
+  "ha_url": "http://homeassistant.local:8123",
+  "ha_token": "",
+  "ha_entity": "switch.dreamcast",
+  "ha_power_sensor": "",
+  "power_off_seconds": 5,
+  "boot_grace": 10,
+  "boot_timeout": 90,
+  "max_resets_per_hour": 20,
+  "max_failed_boots": 2,
+  "idle_power_off_minutes": 0,
+
+  "state_file": "/var/lib/dcmgr/state.json",
+  "retention_days": 365,
+
+  "guide_notes_file": "/etc/dcmgr/notes.md",
+  "guide_includes_token": false,
+
+  "capture_device": "",
+  "capture_size": "",
+  "capture_filter": "",
+  "capture_audio_device": ""
+}
