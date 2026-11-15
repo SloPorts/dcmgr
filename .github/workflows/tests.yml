@@ -1,0 +1,34 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "3.8"     # the oldest version dcmgr supports
+            os: ubuntu-22.04
+          - python: "3.12"
+            os: ubuntu-latest
+          - python: "3.13"
+            os: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install ffmpeg (capture, recording and calibration tests)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
+      - name: Run the tests
+        run: python -W error::ResourceWarning -m unittest discover -s tests -v
+      - name: Check the shell scripts
+        run: |
+          sh -n deploy/install.sh
+          sh -n deploy/power-command.example.sh
+          sh -n deploy/dcmgr.initd

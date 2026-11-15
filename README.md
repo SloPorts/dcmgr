@@ -1,5 +1,7 @@
 # dcmgr: share one Dreamcast between machines
 
+[![tests](https://github.com/SloPorts/dcmgr/actions/workflows/tests.yml/badge.svg)](https://github.com/SloPorts/dcmgr/actions/workflows/tests.yml)
+
 Source and releases: https://github.com/SloPorts/dcmgr
 
 A small server (`dcmgr_server.py`, Python 3.8+, no dependencies) owns a real Dreamcast. Dev machines,
